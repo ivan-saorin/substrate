@@ -14,7 +14,7 @@ COPY requirements.txt /app/
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Python path setup
-ENV PYTHONPATH=/app:$PYTHONPATH
+# Python path setup - using default empty value to avoid undefined variable warning
+ENV PYTHONPATH=/app:${PYTHONPATH:-}
 
 # This is a base image, no CMD
