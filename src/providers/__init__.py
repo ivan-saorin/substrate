@@ -7,9 +7,11 @@ from .providers import (
     ProviderType,
     LocalProvider,
     OpenAIProvider,
-    AnthropicAPIProvider,
+    AnthropicProvider,
     GoogleProvider,
-    ProviderManager
+    GroqProvider,
+    ProviderManager,
+    ModelConfig
 )
 
 __all__ = [
@@ -17,7 +19,9 @@ __all__ = [
     "ProviderType",
     "LocalProvider",
     "OpenAIProvider",
-    "AnthropicAPIProvider",
+    "AnthropicProvider",
     "GoogleProvider",
-    "ProviderManager"
+    "GroqProvider",
+    "ProviderManager",
+    "ModelConfig"
 ]
