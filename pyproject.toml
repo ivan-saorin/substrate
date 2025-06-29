@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Ivan", email = "ivan@example.com"},
+    {name = "Ivan", email = "ivan.saorin(at)gmail.com"},
 ]
 keywords = ["mcp", "llm", "substrate", "framework"]
 classifiers = [
@@ -42,10 +42,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ivan/substrate-mcp"
-Documentation = "https://github.com/ivan/substrate-mcp/wiki"
-Repository = "https://github.com/ivan/substrate-mcp"
-Issues = "https://github.com/ivan/substrate-mcp/issues"
+Homepage = "https://github.com/ivan-saorin/substrate-mcp"
+Documentation = "https://github.com/ivan-saorin/substrate-mcp/wiki"
+Repository = "https://github.com/ivan-saorin/substrate-mcp"
+Issues = "https://github.com/ivan-saorin/substrate-mcp/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
