@@ -40,7 +40,7 @@ Substrate is a foundation framework for building [Model Context Protocol (MCP)](
 
 ```bash
 # Install from source
-git clone https://github.com/yourusername/substrate.git
+git clone https://github.com/ivan-saorin/substrate.git
 cd substrate
 pip install -e .
 
@@ -244,7 +244,7 @@ Every Substrate server automatically includes:
 
 ### Real Implementation: AKAB
 
-[AKAB](https://github.com/yourusername/akab) is a production A/B testing server built on Substrate:
+[AKAB](https://github.com/ivan-saorin/akab) is a production A/B testing server built on Substrate:
 
 ```python
 class AKABServer(SubstrateMCP):
@@ -330,7 +330,7 @@ SubstrateMCP (Base Class)
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/substrate.git
+git clone https://github.com/ivan-saorin/substrate.git
 cd substrate
 
 # Create virtual environment
@@ -392,7 +392,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Links
 
-- [Documentation](https://github.com/yourusername/substrate/wiki)
-- [Examples](https://github.com/yourusername/substrate/tree/main/examples)
-- [AKAB Implementation](https://github.com/yourusername/akab)
+- [Documentation](https://github.com/ivan-saorin/substrate/wiki)
+- [Examples](https://github.com/ivan-saorin/substrate/tree/main/examples)
+- [AKAB Implementation](https://github.com/ivan-saorin/akab)
 - [MCP Protocol Docs](https://modelcontextprotocol.io)
