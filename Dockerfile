@@ -1,20 +1,23 @@
+# Substrate MCP Base Image
 FROM python:3.11-slim
 
-WORKDIR /app
+# Set working directory
+WORKDIR /substrate
 
-# System dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy package files
+COPY pyproject.toml README.md LICENSE ./
+
 # Copy source code
-COPY src/ /app/
-COPY requirements.txt /app/
+COPY src/ ./src/
+COPY templates/ ./templates/
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the package
+RUN pip install --no-cache-dir .
 
-# Python path setup - using default empty value to avoid undefined variable warning
-ENV PYTHONPATH=/app:${PYTHONPATH:-}
-
-# This is a base image, no CMD
+# This image is meant to be used as a base
+# It doesn't have a CMD as it's not meant to run standalone

@@ -1,40 +1,107 @@
-"""
-Substrate - Foundation layer for AI applications
-Provides MCP protocol, multi-provider support, evaluation, and filesystem utilities
-"""
+"""Substrate MCP Foundation - Base framework for MCP servers."""
 
-__version__ = "1.0.0"
-
-# Re-export main components for easy access
-from .mcp.server import FastMCP
-from .providers import (
-    Provider,
-    ProviderType,
-    LocalProvider,
-    OpenAIProvider,
-    AnthropicAPIProvider,
-    GoogleProvider,
-    ProviderManager
+from .base import SubstrateMCP
+from .errors import (
+    SubstrateError,
+    ValidationError,
+    NotFoundError,
+    PermissionError,
+    RateLimitError,
+    TimeoutError,
+    ExternalServiceError,
+    format_error_response,
+    handle_errors,
 )
-from .evaluation import EvaluationEngine
-from .filesystem import FileSystemManager
+from .progress import (
+    ProgressTracker,
+    OperationTracker,
+    ProgressContext,
+    estimate_progress,
+)
+from .responses import ResponseBuilder
+from .sampling import SamplingManager, SamplingContext
+from .types import (
+    Tool,
+    ToolParameter,
+    ToolResponse,
+    SamplingRequest,
+    Annotation,
+    ResponseMetadata,
+    ProgressUpdate,
+    ErrorInfo,
+    PromptDefinition,
+    ProviderConfig,
+    ComparisonResult,
+    Campaign,
+)
+from .utils import (
+    generate_id,
+    hash_content,
+    truncate_string,
+    format_duration,
+    format_size,
+    deep_merge,
+    sanitize_filename,
+    retry_async,
+    chunk_list,
+    flatten_dict,
+    Timer,
+)
+
+__version__ = "2.0.0"
 
 __all__ = [
-    # MCP
-    "FastMCP",
+    # Base class
+    "SubstrateMCP",
     
-    # Providers
-    "Provider",
-    "ProviderType",
-    "LocalProvider",
-    "OpenAIProvider",
-    "AnthropicAPIProvider",
-    "GoogleProvider",
-    "ProviderManager",
+    # Errors
+    "SubstrateError",
+    "ValidationError", 
+    "NotFoundError",
+    "PermissionError",
+    "RateLimitError",
+    "TimeoutError",
+    "ExternalServiceError",
+    "format_error_response",
+    "handle_errors",
     
-    # Evaluation
-    "EvaluationEngine",
+    # Progress tracking
+    "ProgressTracker",
+    "OperationTracker",
+    "ProgressContext",
+    "estimate_progress",
     
-    # Filesystem
-    "FileSystemManager"
+    # Response building
+    "ResponseBuilder",
+    
+    # Sampling
+    "SamplingManager",
+    "SamplingContext",
+    
+    # Types
+    "Tool",
+    "ToolParameter",
+    "ToolResponse",
+    "SamplingRequest",
+    "Annotation",
+    "ResponseMetadata",
+    "ProgressUpdate",
+    "ErrorInfo",
+    "PromptDefinition",
+    "ProviderConfig",
+    "ComparisonResult",
+    "Campaign",
+    
+    # Utils
+    "generate_id",
+    "hash_content",
+    "truncate_string",
+    "format_duration",
+    "format_size",
+    "deep_merge",
+    "sanitize_filename",
+    "retry_async",
+    "chunk_list",
+    "flatten_dict",
+    "Timer",
 ]

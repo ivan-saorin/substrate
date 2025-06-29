@@ -1,0 +1,1 @@
+# Substrate MCP Foundation Tests
