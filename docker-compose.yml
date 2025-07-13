@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  substrate:
+    build: .
+    image: substrate-mcp:latest
+    container_name: substrate-mcp-dev
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MCP_TRANSPORT=stdio
+    volumes:
+      - ./docs:/app/docs:ro
+    stdin_open: true
+    tty: true
+    command: python -m substrate.server

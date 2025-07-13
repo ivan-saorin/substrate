@@ -1,0 +1,102 @@
+{
+  "components": {
+    "substrate": {
+      "purpose": "Foundation layer - base classes and documentation",
+      "type": "passive",
+      "status": "IMPLEMENTED",
+      "provides": ["base_classes", "documentation", "patterns"],
+      "tools": [
+        {
+          "name": "substrate",
+          "description": "Get system documentation and patterns"
+        }
+      ]
+    },
+    "akab": {
+      "purpose": "A/B testing framework with three levels of rigor",
+      "type": "active",
+      "status": "IMPLEMENTED",
+      "responsibilities": [
+        "Level 1: Quick comparisons (no blinding)",
+        "Level 2: Campaigns (execution blinding)",
+        "Level 3: Experiments (complete blinding)",
+        "Statistical analysis with trimmed means",
+        "Result storage in /krill/ directory"
+      ],
+      "tools": [
+        {
+          "name": "akab",
+          "description": "Get capabilities and documentation"
+        },
+        {
+          "name": "akab_sampling_callback",
+          "description": "Handle sampling callbacks"
+        },
+        {
+          "name": "akab_quick_compare",
+          "description": "Level 1: Quick comparison across providers"
+        },
+        {
+          "name": "akab_create_campaign",
+          "description": "Level 2: Create A/B testing campaign"
+        },
+        {
+          "name": "akab_execute_campaign",
+          "description": "Execute a campaign"
+        },
+        {
+          "name": "akab_analyze_results",
+          "description": "Analyze campaign results"
+        },
+        {
+          "name": "akab_list_campaigns",
+          "description": "List all campaigns"
+        },
+        {
+          "name": "akab_cost_report",
+          "description": "Get cost report"
+        },
+        {
+          "name": "akab_unlock",
+          "description": "Unlock and archive campaigns/experiments"
+        },
+        {
+          "name": "akab_list_scrambled_models",
+          "description": "Level 3: List scrambled model IDs"
+        },
+        {
+          "name": "akab_create_experiment",
+          "description": "Level 3: Create scientific experiment"
+        },
+        {
+          "name": "akab_reveal_experiment",
+          "description": "Level 3: Reveal experiment results"
+        },
+        {
+          "name": "akab_diagnose_experiment",
+          "description": "Level 3: Diagnose experiment issues"
+        }
+      ]
+    },
+    "krill": {
+      "purpose": "Result storage directory (implemented within AKAB)",
+      "type": "storage",
+      "status": "IMPLEMENTED",
+      "location": "/krill/",
+      "structure": {
+        "campaigns": "All campaign data",
+        "experiments": "Experiment definitions",
+        "results": "Raw execution results",
+        "archive": "Completed work"
+      }
+    }
+  },
+  "example_extensions": {
+    "your-mcp": {
+      "purpose": "Your domain-specific functionality",
+      "type": "active",
+      "dependencies": ["substrate", "akab"],
+      "integration": "Use AKAB for any model comparisons"
+    }
+  }
+}
