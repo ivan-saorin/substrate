@@ -42,7 +42,7 @@ dependencies = [
 ### For Development
 
 ```bash
-git clone https://github.com/your-org/substrate
+git clone https://github.com/ivan-saorin/substrate
 cd substrate
 pip install -e .
 ```
@@ -176,7 +176,7 @@ async with self.progress_context("operation") as progress:
 
 ## Integration with AKAB
 
-Substrate is designed to work with [AKAB](https://github.com/your-org/akab) for A/B testing:
+Substrate is designed to work with [AKAB](https://github.com/ivan-saorin/akab) for A/B testing:
 
 ```python
 # In your MCP
