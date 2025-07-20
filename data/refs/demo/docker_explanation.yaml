@@ -1,0 +1,7 @@
+content: Docker containers provide isolated environments for applications. They package
+  code with all dependencies, ensuring consistency across different computing environments.
+  Containers share the host OS kernel, making them lighter than virtual machines while
+  maintaining process isolation.
+created: '2025-07-20T20:40:29.525992'
+metadata: {}
+updated: '2025-07-20T20:40:29.526003'

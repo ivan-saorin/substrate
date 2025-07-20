@@ -1,5 +1,6 @@
 """Execution feature - Execute patterns for TLOEN/UQBAR instances"""
 from typing import Dict, Any, List, Optional
+import fastmcp.types as types
 
 
 def register_execution_tools(server) -> List[dict]:
@@ -151,3 +152,26 @@ async def _compose_input(server, prompt: Optional[str] = None,
         return prompt
     
     return ""
+
+
+def get_tool_schemas(instance_type: str) -> List[types.Tool]:
+    """Get FastMCP tool schemas for execution tools"""
+    if instance_type in ["tloen", "uqbar"]:
+        return [
+            types.Tool(
+                name=f"{instance_type}_execute",
+                description=f"Execute transformation using {instance_type} templates/personas",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "prompt": {"type": "string"},
+                        "ref": {"type": "string"},
+                        "refs": {"type": "array", "items": {"type": "string"}},
+                        "prompt_ref": {"type": "string"},
+                        "save_as": {"type": "string"}
+                    },
+                    "required": []
+                }
+            )
+        ]
+    return []

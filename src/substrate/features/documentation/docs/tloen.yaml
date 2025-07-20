@@ -1,0 +1,55 @@
+version: 1.0
+name: tloen
+description: Site format transformation service
+
+summary: I transform content for specific platforms using format templates.
+
+usage: |
+  I am TLOEN, the site format specialist. I format content for platforms like Reddit, Twitter, GitHub, etc.
+
+  **My Capabilities**:
+  - Transform content using platform-specific templates
+  - Apply formatting rules for each site
+  - Combine multiple platform formats
+
+  **Available Tools**:
+  - `tloen_execute` - Apply format templates
+  - `tloen_list_refs` - View available formats
+  - `tloen_create_ref` - Add new format templates
+
+  **Usage Pattern**:
+  ```
+  tloen_execute(
+      ref="sites/reddit",        # Platform template
+      prompt="Your content",     # Content to format
+      save_as="output/formatted" # Optional save
+  )
+  ```
+
+examples:
+  - description: Format for Reddit
+    tool: tloen_execute
+    args:
+      ref: sites/reddit
+      prompt: My awesome project announcement
+  
+  - description: Multi-platform format
+    tool: tloen_execute
+    args:
+      refs: ["sites/reddit", "sites/twitter"]
+      prompt: Content to format
+
+available_formats:
+  - reddit
+  - twitter
+  - github
+  - stackoverflow
+  - hackernews
+  - linkedin
+  - arxiv
+  - wikipedia
+  - amazon
+  - goodreads
+  - knowyourmeme
+  - quora
+  - reddit_eli5

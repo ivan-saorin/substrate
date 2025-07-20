@@ -32,7 +32,7 @@ except Exception as e:
 
 # Get instance configuration
 INSTANCE_TYPE = os.getenv("INSTANCE_TYPE", "substrate")
-INSTANCE_DESCRIPTION = os.getenv("INSTANCE_DESCRIPTION", "Cognitive manipulation substrate")
+INSTANCE_DESCRIPTION = os.getenv("INSTANCE_DESCRIPTION", "LLM Cognitive manipulation substrate")
 
 # Create FastMCP instance
 mcp = FastMCP(INSTANCE_TYPE)

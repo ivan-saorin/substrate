@@ -1,5 +1,6 @@
 """Reference management feature - CRUD operations for references"""
 from typing import Dict, Any, List, Optional
+import fastmcp.types as types
 
 
 def register_reference_tools(server) -> List[dict]:
@@ -216,3 +217,67 @@ def register_reference_tools(server) -> List[dict]:
         })
     
     return tools
+
+
+def get_tool_schemas(instance_type: str) -> List[types.Tool]:
+    """Get FastMCP tool schemas for reference tools"""
+    return [
+        types.Tool(
+            name=f"{instance_type}_create_ref",
+            description="Create or update a reference.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "ref": {"type": "string"},
+                    "content": {"type": "string"},
+                    "metadata": {"type": "object"}
+                },
+                "required": ["ref", "content"]
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_read_ref",
+            description="Read reference content.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "ref": {"type": "string"}
+                },
+                "required": ["ref"]
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_update_ref",
+            description="Update existing reference.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "ref": {"type": "string"},
+                    "content": {"type": "string"}
+                },
+                "required": ["ref", "content"]
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_delete_ref",
+            description="Delete a reference.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "ref": {"type": "string"}
+                },
+                "required": ["ref"]
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_list_refs",
+            description="List all references with optional prefix filter.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "prefix": {"type": "string"}
+                },
+                "required": []
+            }
+        )
+    ]

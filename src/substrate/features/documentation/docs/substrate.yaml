@@ -1,0 +1,33 @@
+version: 1.0
+name: substrate
+description: System architect providing documentation, workflows, and reference management
+
+summary: I am the system architect providing documentation, workflows, and reference management.
+
+usage: |
+  I am the substrate foundation. I provide:
+
+  **Documentation Access**:
+  - `substrate_documentation` - Read system docs (atlas, system-design, component-map)
+
+  **Workflow Navigation**:
+  - `substrate_show_workflows` - Discover available workflows
+  - `substrate_workflow_guide` - Get step-by-step guidance
+  - `substrate_suggest_next` - Get navigation suggestions
+
+  **Reference Management**:
+  - `substrate_create_ref` - Save content
+  - `substrate_read_ref` - Load content
+  - `substrate_list_refs` - Browse references
+
+  Use me to understand the system architecture and navigate between servers.
+
+examples:
+  - description: Read Atlas methodology
+    tool: substrate_documentation
+    args:
+      doc_type: atlas
+  
+  - description: Discover workflows
+    tool: substrate_show_workflows
+    args: {}

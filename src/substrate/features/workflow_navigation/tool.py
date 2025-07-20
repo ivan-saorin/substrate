@@ -2,6 +2,7 @@
 from typing import Dict, Any, List, Optional
 import os
 from pathlib import Path
+import fastmcp.types as types
 
 
 def register_workflow_tools(server) -> List[dict]:
@@ -324,3 +325,48 @@ def _build_workflow_params(current_step: Dict[str, Any],
             params[input_name] = context[input_name]
     
     return params
+
+
+def get_tool_schemas(instance_type: str) -> List[types.Tool]:
+    """Get FastMCP tool schemas for workflow tools"""
+    # Only substrate and atlas get workflow tools
+    if instance_type not in ["substrate", "atlas"]:
+        return []
+    
+    return [
+        types.Tool(
+            name=f"{instance_type}_show_workflows",
+            description="Discover available cognitive manipulation workflows",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "category": {"type": "string"},
+                    "tool": {"type": "string"}
+                },
+                "required": []
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_workflow_guide",
+            description="Get step-by-step guidance for a specific workflow",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workflow_name": {"type": "string"}
+                },
+                "required": ["workflow_name"]
+            }
+        ),
+        types.Tool(
+            name=f"{instance_type}_suggest_next",
+            description="Get smart suggestions for next tool based on current context",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "current_tool": {"type": "string"},
+                    "context": {"type": "object"}
+                },
+                "required": ["current_tool"]
+            }
+        )
+    ]
