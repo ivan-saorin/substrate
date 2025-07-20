@@ -223,6 +223,88 @@ def main():
     server.run()
 ```
 
+## FastMCP Architecture (CRITICAL)
+
+### Understanding FastMCP Requirements
+
+FastMCP is the recommended Python framework for building MCP servers. It requires specific architectural patterns that must be understood to avoid common implementation errors.
+
+#### FastMCP File Structure
+
+```
+server/
+├── src/
+│   └── server_name/
+│       ├── __main__.py      # Entry point
+│       ├── server.py        # FastMCP instance and decorated tools
+│       └── (other modules)  # Business logic, handlers, etc.
+```
+
+**Key Points:**
+- FastMCP manages its own async event loop - NEVER use `asyncio.run()`
+- The `mcp = FastMCP("name")` instance must be created at module level
+- Tools are registered using the `@mcp.tool()` decorator
+- The framework handles all protocol details, JSON-RPC, and transport
+
+#### Dynamic Tool Loading with FastMCP
+
+**YES, dynamic tool loading is possible!** While FastMCP uses decorators, the `mcp.tool()` decorator can also be used as a function for runtime registration:
+
+```python
+# Static registration (typical)
+@mcp.tool()
+def static_tool():
+    pass
+
+# Dynamic registration (for modular loading)
+def register_dynamic_tools(mcp):
+    def dynamic_tool():
+        """Dynamically registered tool"""
+        return "result"
+    
+    # Register at runtime
+    mcp.tool()(dynamic_tool)
+```
+
+This enables the hybrid feature pattern where tools are defined in feature modules and registered dynamically.
+
+#### Feature-Based Architecture with FastMCP
+
+```python
+# server_fastmcp.py - Main FastMCP instance
+from fastmcp import FastMCP
+mcp = FastMCP("server_name")
+
+# Import and register features
+from .features import register_all_features
+register_all_features(mcp)
+
+# features/documentation/tool.py
+def register_documentation_tools(mcp):
+    @mcp.tool(name="get_docs")
+    async def get_documentation(doc_type: str):
+        from .handler import DocumentationHandler
+        handler = DocumentationHandler()
+        return await handler.get_docs(doc_type)
+```
+
+### Common FastMCP Pitfalls
+
+1. **Duplicate Server Files Confusion**
+   - `server.py` - Optional wrapper for complex initialization
+   - `server_fastmcp.py` - REQUIRED: Contains FastMCP instance
+   - These are NOT duplicates - FastMCP requires this pattern
+
+2. **Shared Instance Management**
+   - Create shared resources (ResponseBuilder, etc.) ONCE
+   - Import in both server files to avoid duplication
+   - Use dependency injection for feature modules
+
+3. **Error Handling with FastMCP**
+   - FastMCP has built-in error decorators but they're optional
+   - Custom error handling with suggestions is perfectly valid
+   - Return structured errors as part of the response data
+
 ## Docker Build Patterns
 
 ### Dockerfile Template for MCPs

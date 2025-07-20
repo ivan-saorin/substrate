@@ -1,283 +1,210 @@
-"""Reference management feature - CRUD operations for references"""
+"""
+Reference management feature - Tool registration
+"""
+import logging
 from typing import Dict, Any, List, Optional
-import fastmcp.types as types
+from .handler import ReferenceHandler
+
+logger = logging.getLogger(__name__)
 
 
-def register_reference_tools(server) -> List[dict]:
-    """Register reference management tools on the server"""
+def register_reference_tools(mcp) -> List[dict]:
+    """
+    Register reference management tools with FastMCP
     
+    Args:
+        mcp: FastMCP instance to register tools on
+        
+    Returns:
+        List of tool metadata
+    """
+    # Import shared instances
+    from ...shared.instances import response_builder, INSTANCE_TYPE
+    
+    # Create handler instance
+    handler = ReferenceHandler()
+    
+    # Create reference tool
+    @mcp.tool(name=f"{INSTANCE_TYPE}_create_ref")
     async def create_ref(
         ref: str,
         content: str,
         metadata: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Create or update a reference
-        
-        Args:
-            ref: Reference path (e.g., 'prompts/enhanced')
-            content: Content to store
-            metadata: Optional metadata
-        """
+        """Create or update a reference"""
         try:
-            result = await server.reference_manager.create_ref(ref, content, metadata)
+            result = await handler.create_reference(ref, content, metadata)
             
+            # Generate smart suggestions
             suggestions = [
-                server.response_builder.suggest_next(
-                    f"{server.instance_type}:read_ref",
+                response_builder.suggest_next(
+                    f"{INSTANCE_TYPE}_read_ref",
                     "Read the saved reference",
                     ref=ref
-                ),
-                server.response_builder.suggest_next(
-                    f"{server.instance_type}:list_refs", 
-                    "View all references",
-                    prefix=ref.split('/')[0] if '/' in ref else None
                 )
             ]
             
-            if 'prompt' in ref.lower():
+            # Add context-aware suggestions
+            handler_suggestions = handler.suggest_next_actions(ref, 'create')
+            for suggestion in handler_suggestions:
                 suggestions.append(
-                    server.response_builder.suggest_next(
-                        "synapse:enhance_prompt",
-                        "Enhance the saved prompt",
-                        prompt_ref=ref
+                    response_builder.suggest_next(
+                        suggestion['tool'],
+                        suggestion['reason'],
+                        **suggestion['params']
                     )
                 )
             
-            return server.response_builder.success(
+            return response_builder.success(
                 data=result,
-                message=f"Reference {'created' if result['created'] else 'updated'}: {ref}",
-                suggestions=suggestions
+                message=f"Reference '{ref}' {'created' if result['created'] else 'updated'}",
+                suggestions=suggestions[:3]  # Limit to top 3
             )
             
         except Exception as e:
-            return server.response_builder.error(
-                str(e),
+            logger.error(f"Error in create_ref: {e}", exc_info=True)
+            return response_builder.error(
+                error=str(e),
                 details={"ref": ref}
             )
     
+    # Read reference tool
+    @mcp.tool(name=f"{INSTANCE_TYPE}_read_ref")
     async def read_ref(ref: str) -> Dict[str, Any]:
-        """Read reference content
-        
-        Args:
-            ref: Reference path to read
-        """
+        """Read reference content"""
         try:
-            content = await server.reference_manager.read_ref(ref)
+            content = await handler.read_reference(ref)
+            
+            # Generate suggestions based on content
+            suggestions = []
+            handler_suggestions = handler.suggest_next_actions(ref, 'read')
+            for suggestion in handler_suggestions:
+                suggestions.append(
+                    response_builder.suggest_next(
+                        suggestion['tool'],
+                        suggestion['reason'],
+                        **suggestion['params']
+                    )
+                )
+            
+            return response_builder.success(
+                data={"ref": ref, "content": content},
+                message=f"Reference '{ref}' loaded",
+                suggestions=suggestions[:3]
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in read_ref: {e}", exc_info=True)
+            return response_builder.error(
+                error=f"Reference not found: {ref}",
+                details={"ref": ref}
+            )
+    
+    # Update reference tool
+    @mcp.tool(name=f"{INSTANCE_TYPE}_update_ref")
+    async def update_ref(ref: str, content: str) -> Dict[str, Any]:
+        """Update existing reference"""
+        try:
+            result = await handler.update_reference(ref, content)
             
             suggestions = [
-                server.response_builder.suggest_next(
-                    f"{server.instance_type}:update_ref",
-                    "Update this reference",
+                response_builder.suggest_next(
+                    f"{INSTANCE_TYPE}_read_ref",
+                    "Read the updated reference",
                     ref=ref
                 )
             ]
             
-            # Context-aware suggestions
-            if 'prompt' in ref.lower():
-                suggestions.extend([
-                    server.response_builder.suggest_next(
-                        "synapse:enhance_prompt",
-                        "Enhance this prompt",
-                        prompt_ref=ref
-                    ),
-                    server.response_builder.suggest_next(
-                        "akab:quick_compare",
-                        "Compare across providers",
-                        prompt=content
-                    )
-                ])
-            elif server.instance_type == 'tloen':
-                suggestions.append(
-                    server.response_builder.suggest_next(
-                        f"{server.instance_type}:execute",
-                        "Apply this template",
-                        ref=ref
-                    )
-                )
-            
-            return server.response_builder.success(
-                data={"content": content, "ref": ref},
-                message=f"Reference loaded: {ref}",
+            return response_builder.success(
+                data=result,
+                message=f"Reference '{ref}' updated",
                 suggestions=suggestions
             )
             
-        except FileNotFoundError:
-            return server.response_builder.error(
-                f"Reference not found: {ref}",
-                details={"ref": ref, "type": "not_found"}
-            )
         except Exception as e:
-            return server.response_builder.error(str(e))
-    
-    async def update_ref(ref: str, content: str) -> Dict[str, Any]:
-        """Update existing reference
-        
-        Args:
-            ref: Reference path to update
-            content: New content
-        """
-        try:
-            result = await server.reference_manager.update_ref(ref, content)
-            
-            return server.response_builder.success(
-                data=result,
-                message=f"Reference updated: {ref}",
-                suggestions=[
-                    server.response_builder.suggest_next(
-                        f"{server.instance_type}:read_ref",
-                        "Read updated reference",
-                        ref=ref
-                    )
-                ]
-            )
-            
-        except FileNotFoundError:
-            return server.response_builder.error(
-                f"Reference not found: {ref}",
-                details={"ref": ref, "hint": "Use create_ref for new references"}
-            )
-        except Exception as e:
-            return server.response_builder.error(str(e))
-    
-    async def delete_ref(ref: str) -> Dict[str, Any]:
-        """Delete a reference
-        
-        Args:
-            ref: Reference path to delete
-        """
-        try:
-            result = await server.reference_manager.delete_ref(ref)
-            
-            return server.response_builder.success(
-                data=result,
-                message=f"Reference deleted: {ref}",
-                suggestions=[
-                    server.response_builder.suggest_next(
-                        f"{server.instance_type}:list_refs",
-                        "View remaining references"
-                    )
-                ]
-            )
-            
-        except FileNotFoundError:
-            return server.response_builder.error(
-                f"Reference not found: {ref}",
+            logger.error(f"Error in update_ref: {e}", exc_info=True)
+            return response_builder.error(
+                error=str(e),
                 details={"ref": ref}
             )
-        except Exception as e:
-            return server.response_builder.error(str(e))
     
-    async def list_refs(prefix: Optional[str] = None) -> Dict[str, Any]:
-        """List all references
-        
-        Args:
-            prefix: Optional prefix to filter references
-        """
+    # Delete reference tool
+    @mcp.tool(name=f"{INSTANCE_TYPE}_delete_ref")
+    async def delete_ref(ref: str) -> Dict[str, Any]:
+        """Delete a reference"""
         try:
-            refs = await server.reference_manager.list_refs(prefix)
+            result = await handler.delete_reference(ref)
+            
+            suggestions = [
+                response_builder.suggest_next(
+                    f"{INSTANCE_TYPE}_list_refs",
+                    "View remaining references"
+                )
+            ]
+            
+            return response_builder.success(
+                data=result,
+                message=f"Reference '{ref}' deleted",
+                suggestions=suggestions
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in delete_ref: {e}", exc_info=True)
+            return response_builder.error(
+                error=str(e),
+                details={"ref": ref}
+            )
+    
+    # List references tool
+    @mcp.tool(name=f"{INSTANCE_TYPE}_list_refs")
+    async def list_refs(prefix: Optional[str] = None) -> Dict[str, Any]:
+        """List all references with optional prefix filter"""
+        try:
+            refs = await handler.list_references(prefix)
             
             suggestions = []
-            if refs:
-                # Suggest reading the first few
-                for ref in refs[:3]:
+            if refs and not prefix:
+                # Suggest exploring categories
+                categories = set(ref.split('/')[0] for ref in refs if '/' in ref)
+                for category in list(categories)[:3]:
                     suggestions.append(
-                        server.response_builder.suggest_next(
-                            f"{server.instance_type}:read_ref",
-                            f"Read {ref}",
-                            ref=ref
+                        response_builder.suggest_next(
+                            f"{INSTANCE_TYPE}_list_refs",
+                            f"View {category} references",
+                            prefix=category
                         )
                     )
             
-            return server.response_builder.success(
-                data={
-                    "refs": refs,
-                    "count": len(refs),
-                    "prefix": prefix
-                },
+            return response_builder.success(
+                data={"refs": refs, "count": len(refs)},
                 message=f"Found {len(refs)} references",
                 suggestions=suggestions
             )
             
         except Exception as e:
-            return server.response_builder.error(str(e))
-    
-    # Register all reference tools
-    server.register_tool(f"{server.instance_type}_create_ref", create_ref)
-    server.register_tool(f"{server.instance_type}_read_ref", read_ref)
-    server.register_tool(f"{server.instance_type}_update_ref", update_ref)
-    server.register_tool(f"{server.instance_type}_delete_ref", delete_ref)
-    server.register_tool(f"{server.instance_type}_list_refs", list_refs)
+            logger.error(f"Error in list_refs: {e}", exc_info=True)
+            return response_builder.error(error=str(e))
     
     # Return tool metadata
-    tools = []
-    for name in ['create_ref', 'read_ref', 'update_ref', 'delete_ref', 'list_refs']:
-        tools.append({
-            "name": f"{server.instance_type}_{name}",
-            "description": f"Reference management: {name}"
-        })
-    
-    return tools
-
-
-def get_tool_schemas(instance_type: str) -> List[types.Tool]:
-    """Get FastMCP tool schemas for reference tools"""
     return [
-        types.Tool(
-            name=f"{instance_type}_create_ref",
-            description="Create or update a reference.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "ref": {"type": "string"},
-                    "content": {"type": "string"},
-                    "metadata": {"type": "object"}
-                },
-                "required": ["ref", "content"]
-            }
-        ),
-        types.Tool(
-            name=f"{instance_type}_read_ref",
-            description="Read reference content.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "ref": {"type": "string"}
-                },
-                "required": ["ref"]
-            }
-        ),
-        types.Tool(
-            name=f"{instance_type}_update_ref",
-            description="Update existing reference.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "ref": {"type": "string"},
-                    "content": {"type": "string"}
-                },
-                "required": ["ref", "content"]
-            }
-        ),
-        types.Tool(
-            name=f"{instance_type}_delete_ref",
-            description="Delete a reference.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "ref": {"type": "string"}
-                },
-                "required": ["ref"]
-            }
-        ),
-        types.Tool(
-            name=f"{instance_type}_list_refs",
-            description="List all references with optional prefix filter.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "prefix": {"type": "string"}
-                },
-                "required": []
-            }
-        )
+        {
+            "name": f"{INSTANCE_TYPE}_create_ref",
+            "description": "Create or update a reference"
+        },
+        {
+            "name": f"{INSTANCE_TYPE}_read_ref", 
+            "description": "Read reference content"
+        },
+        {
+            "name": f"{INSTANCE_TYPE}_update_ref",
+            "description": "Update existing reference"
+        },
+        {
+            "name": f"{INSTANCE_TYPE}_delete_ref",
+            "description": "Delete a reference"
+        },
+        {
+            "name": f"{INSTANCE_TYPE}_list_refs",
+            "description": "List all references with optional prefix filter"
+        }
     ]

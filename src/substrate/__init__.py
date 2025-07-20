@@ -1,5 +1,5 @@
 """Substrate - Foundation for Atlas cognitive manipulation system"""
-from .server_fastmcp import SubstrateServer
+from .server import SubstrateServer
 
 __version__ = "2.0.0"
 

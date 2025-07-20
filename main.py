@@ -6,15 +6,16 @@ import sys
 # Add src to path before imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from substrate.server_fastmcp import SubstrateServer
+from substrate.server import SubstrateServer
 
 
 def main():
     """Run the substrate server"""
-    # Configure logging
+    # Configure logging to stderr (CRITICAL: never stdout for MCP!)
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        stream=sys.stderr
     )
     
     # Create and run server
