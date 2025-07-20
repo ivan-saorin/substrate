@@ -29,6 +29,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "fastmcp>=0.1.0",
+        "PyYAML>=6.0",
     ],
     extras_require={
         "dev": [

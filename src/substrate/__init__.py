@@ -1,18 +1,18 @@
-"""Substrate - System Architect MCP Server
+"""Substrate - Foundation for all Atlas MCP servers
 
-This module implements the substrate MCP server that serves as the system architect,
-providing documentation and methodology for the entire system.
+This module provides base classes and components for building MCP servers
+in the Atlas cognitive manipulation system.
 """
 
-from .server import SubstrateServer
 from .base import SubstrateMCP, HermesExecutor, ExecutionRequest, ExecutionResult
 from .errors import SubstrateError, ValidationError, NotFoundError
-from .components import ResponseBuilder, ProgressTracker, SamplingManager
+from .components import ResponseBuilder, ProgressTracker, SamplingManager, ReferenceManager
+from .server import SubstrateServer
 
 __version__ = "1.0.0"
 
 __all__ = [
-    # Server
+    # Server (documentation server)
     "SubstrateServer",
     
     # Base classes
@@ -30,4 +30,5 @@ __all__ = [
     "ResponseBuilder",
     "ProgressTracker",
     "SamplingManager",
+    "ReferenceManager",
 ]
