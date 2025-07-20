@@ -41,6 +41,17 @@ The ASR defines the desired state. Implementation follows the ASR, not the other
 - **Workflows**: Define in YAML ✓
 - **Model metadata**: YAML + .env ✓
 
+### Scientific Integrity First (Phase 2+)
+
+For tools conducting experiments or comparisons (AKAB and future tools), scientific rigor is non-negotiable. Truth over helpfulness is the highest form of helpfulness.
+
+- **Pre-registration required**: Lock hypotheses and metrics before execution
+- **Nuclear honesty enforced**: Report contradictions clearly without sugar-coating
+- **Bias detection active**: Flag p-hacking attempts and post-hoc metrics
+- **Raw data first**: Always report findings before interpretation
+
+See ADR-33 for full implementation details.
+
 ## Architecture Decisions
 
 ### ADR-11: Feature-Based Hybrid Architecture
@@ -225,6 +236,324 @@ docker run -e INSTANCE_TYPE=tloen substrate-mcp:latest
 docker run -e INSTANCE_TYPE=uqbar substrate-mcp:latest
 ```
 
+## Phase 2 Architecture Decisions (AKAB-Specific)
+
+**Note**: Due to AKAB's complexity (103KB monolithic server), Phase 2 requires additional architectural decisions addressing stateful management, triple-blinding, multi-turn execution, and scientific integrity.
+
+### ADR-19: Stateful Feature Management
+
+**Context**: AKAB requires persistent state for campaigns, experiments, and cost tracking across multiple executions.
+
+**Decision**: Implement a standardized state management pattern for complex features.
+
+**Implementation Pattern**:
+
+```python
+# features/campaigns/state.py
+class CampaignState:
+    """Manages campaign lifecycle and persistence"""
+    def __init__(self, storage_manager):
+        self.storage = storage_manager
+        self.active_campaigns = {}
+    
+    async def create_campaign(self, config: Dict) -> str:
+        # Generate ID, validate config, persist
+        pass
+```
+
+### ADR-20: Multi-Turn Conversation Handling
+
+**Context**: AKAB supports multi-turn conversations that need context management.
+
+**Decision**: Standardize multi-turn conversation storage and retrieval.
+
+**Pattern**:
+
+```python
+# shared/conversations/manager.py
+class ConversationManager:
+    async def create_conversation(self, variant_id: str) -> Conversation:
+        """Initialize conversation with variant context"""
+        
+    async def add_turn(self, conv_id: str, role: str, content: str):
+        """Append to conversation history"""
+        
+    async def get_history(self, conv_id: str) -> List[Message]:
+        """Retrieve full conversation for API calls"""
+```
+
+### ADR-21: Cross-Feature Integration
+
+**Context**: AKAB integrates with Synapse for enhancement, requiring clear integration patterns.
+
+**Decision**: Define explicit integration contracts between features.
+
+**Integration Pattern**:
+
+```yaml
+# features/campaigns/integrations.yaml
+integrations:
+  synapse:
+    enhance_prompt:
+      when: "enhancement_config.enhance == true"
+      params:
+        model: "${variant.model}"
+        enhancement_strategy: "${config.enhancement_strategy}"
+      result_mapping:
+        enhanced_prompt: "variant.prompt"
+```
+
+### ADR-22: Complex Response Building
+
+**Context**: AKAB responses include analysis, statistics, and cost data requiring structured composition.
+
+**Decision**: Extend response builder for complex data structures.
+
+**Pattern**:
+
+```python
+# For AKAB's analyze_results
+return server.response_builder.success(
+    data={
+        "analysis": statistical_analysis,
+        "winner": winning_variant,
+        "confidence": confidence_level,
+        "cost_breakdown": cost_data
+    },
+    message="Analysis complete",
+    suggestions=[...],
+    metadata={
+        "computation_time": elapsed,
+        "sample_size": total_executions
+    }
+)
+```
+
+### ADR-23: Feature-Specific Utilities
+
+**Context**: AKAB needs specialized utilities (scrambling, statistics, cost calculation).
+
+**Decision**: Allow feature-specific utility modules within feature boundaries.
+
+**Structure**:
+
+```
+features/experiments/
+  ├── tool.py
+  ├── handler.py
+  ├── prompts.yaml
+  └── utils/
+      ├── scrambler.py      # Model ID scrambling
+      ├── statistics.py     # Statistical analysis
+      └── protocols.py      # Experiment protocols
+```
+
+### ADR-24: Execution Engine Pattern
+
+**Context**: AKAB's laboratory component needs standardized execution handling.
+
+**Decision**: Define execution engine interface for complex operations.
+
+**Interface**:
+
+```python
+# shared/execution/engine.py
+class ExecutionEngine(ABC):
+    @abstractmethod
+    async def execute_single(self, config: Dict) -> Result:
+        """Execute single operation"""
+    
+    @abstractmethod
+    async def execute_batch(self, configs: List[Dict]) -> List[Result]:
+        """Execute multiple operations efficiently"""
+```
+
+### ADR-25: Progressive Loading Strategy
+
+**Context**: AKAB has many features that may not all be used in a single session.
+
+**Decision**: Implement lazy loading for feature components.
+
+**Pattern**:
+
+```python
+# server.py
+async def register_features(server):
+    # Always register discovery tools
+    server.register_tool("akab", get_akab_info)
+    server.register_tool("akab_list_campaigns", list_campaigns)
+    
+    # Lazy load heavy features
+    @lazy_feature
+    async def load_experiments():
+        from .features.experiments import register_experiment_tools
+        return register_experiment_tools(server)
+```
+
+### ADR-26: Isolated Data Directory Pattern ⚠️ CRITICAL
+
+**Context**: AKAB uses `/krill/` directory that is COMPLETELY isolated from LLM access for triple-blinding.
+
+**Decision**: Support isolated data directories outside `allowed_directories`.
+
+**Implementation**:
+
+```python
+# server.py configuration
+ISOLATED_DATA_DIR = os.getenv("AKAB_KRILL_DIR", "/krill")
+
+# features/experiments/handler.py
+class ExperimentHandler:
+    def __init__(self, isolated_dir: str):
+        self.krill_dir = isolated_dir  # LLM cannot access this
+        self.ensure_isolation()
+```
+
+### ADR-27: Model Registry Migration ⚠️ BREAKING CHANGE
+
+**Context**: AKAB hardcodes model mappings in server.py instead of using .env.
+
+**Decision**: Migrate from hardcoded mappings to substrate ModelRegistry.
+
+```python
+# OLD (in server.py)
+self.model_sizes = {
+    "anthropic": {
+        "xs": "claude-3-haiku-20240307",
+        "s": "claude-3-5-haiku-20241022"
+    }
+}
+
+# NEW (using substrate)
+from substrate.models import ModelRegistry
+registry = ModelRegistry()
+model = registry.get_by_size("anthropic", "s")
+```
+
+### ADR-28: Triple-Blinding Architecture
+
+**Context**: AKAB implements three levels of blinding for scientific rigor.
+
+**Decision**: Preserve blinding hierarchy in feature structure.
+
+```yaml
+# features/blinding/config.yaml
+levels:
+  1:
+    name: "None"
+    description: "Full visibility for debugging"
+  2:
+    name: "Execution"
+    description: "Hide during execution, reveal after"
+  3:
+    name: "Triple"
+    description: "Complete isolation until statistical significance"
+```
+
+### ADR-29: Multi-Turn State Machine
+
+**Context**: AKAB supports 10+ turn conversations with continuation detection.
+
+**Decision**: Implement standardized multi-turn execution pattern.
+
+```python
+# shared/execution/multi_turn.py
+class MultiTurnStateMachine:
+    COMPLETION_MARKERS = ["[END]", "[COMPLETE]", "[DONE]"]
+    
+    async def execute_turn(self, messages: List[Dict], turn: int) -> TurnResult:
+        if turn == 1:
+            messages.append({"role": "user", "content": self.initial_prompt})
+        else:
+            messages.append({"role": "user", "content": "continue"})
+```
+
+### ADR-30: Provider Fail-Loud Pattern
+
+**Context**: AKAB validates provider availability at startup and fails loudly.
+
+**Decision**: Implement fail-loud provider initialization.
+
+```python
+# shared/providers/validator.py
+class ProviderValidator:
+    def validate_required_providers(self, required: List[str]):
+        for provider in required:
+            if not self._check_provider(provider):
+                raise RuntimeError(f"{provider} API key missing or invalid")
+```
+
+### ADR-31: Archival and Unlocking System
+
+**Context**: AKAB archives completed campaigns/experiments with mappings.
+
+**Decision**: Implement unlock/archive pattern for completed work.
+
+**Structure**:
+
+```
+archives/
+  {campaign_id}/
+    metadata.json      # Campaign/experiment details
+    mappings.json      # Model identity mappings
+    results/           # All execution results
+    timestamp.txt      # Archive creation time
+    README.md          # Human-readable summary
+```
+
+### ADR-32: Cost Tracking Architecture
+
+**Context**: AKAB tracks costs per execution, variant, and campaign.
+
+**Decision**: Implement hierarchical cost tracking.
+
+**Pattern**:
+
+```python
+# shared/costs/tracker.py
+class CostTracker:
+    async def track_execution(self, execution_id: str, cost: float):
+        # Track at execution level
+        
+    async def aggregate_variant(self, variant_id: str) -> float:
+        # Sum all executions for variant
+        
+    async def report_campaign(self, campaign_id: str) -> Dict:
+        # Full cost breakdown with provider details
+```
+
+### ADR-33: Scientific Research Integrity Protocol ⚠️ CRITICAL
+
+**Context**: AKAB must enforce scientific rigor per the Scientific Research Integrity Protocols.
+
+**Decision**: Embed truth-over-helpfulness principle throughout AKAB's architecture.
+
+**Key Enforcements**:
+
+1. **Pre-registration**: Lock hypotheses and metrics before execution
+2. **Nuclear Honesty**: Report contradictions clearly without sugar-coating
+3. **Bias Detection**: Flag emphatic language and post-hoc metrics
+4. **Raw First**: Always report raw findings before interpretation
+
+```python
+# features/scientific_integrity/enforcer.py
+class ScientificIntegrityEnforcer:
+    def validate_hypothesis(self, config: Dict) -> ValidationResult:
+        """Ensure null hypothesis and falsification criteria"""
+        
+    def enforce_nuclear_honesty(self, results: Dict) -> Report:
+        """Generate brutally honest analysis"""
+        
+    def detect_bias_triggers(self, analysis: str) -> List[Warning]:
+        """Flag potential bias in reporting"""
+```
+
+**Integration by Level**:
+
+- **Level 1**: Educational warnings only
+- **Level 2**: Locked metrics, bias detection active
+- **Level 3**: Full enforcement with mandatory pre-registration
+
 ## Three-Phase Implementation Plan
 
 ### Phase 1: Substrate Foundation + Instances ✓ COMPLETE
@@ -283,6 +612,15 @@ substrate/
 **Duration**: 2 days  
 **Note**: AKAB offline during migration
 
+⚠️ **Critical Warning**: AKAB is the most complex server in the Atlas system with:
+- 103KB monolithic server.py requiring decomposition into 16+ features
+- Triple-blinding architecture with isolated `/krill/` directory
+- Multi-turn execution supporting 10+ turn conversations  
+- Scientific integrity requirements (truth over helpfulness)
+- Hardcoded model mappings requiring migration to .env
+
+See ADRs 19-33 for detailed architectural requirements.
+
 ```
 akab/
 ├── src/
@@ -303,13 +641,19 @@ akab/
 │       │   │   ├── reveal/
 │       │   │   ├── diagnose/
 │       │   │   └── protocols/
+│       │   ├── scientific_integrity/  # Truth over helpfulness
+│       │   │   ├── validator/
+│       │   │   ├── bias_detector/
+│       │   │   └── nuclear_honesty/
 │       │   └── reporting/
 │       │       ├── cost/
 │       │       └── list/
 │       └── shared/
 │           ├── hermes/            # API management
 │           ├── laboratory/        # Execution engine
-│           └── vault/             # Result storage
+│           ├── vault/             # Result storage
+│           ├── providers/         # Fail-loud validation
+│           └── costs/             # Hierarchical tracking
 ```
 
 ### Phase 3: Synapse Evolution
@@ -506,16 +850,40 @@ steps:
 
 ### Phase 2: AKAB
 
-- [ ] Create AKAB feature structure
+**Pre-migration**:
+- [ ] Export 10 test campaigns for validation
+- [ ] Document all statistical formulas
+- [ ] Create /krill/ directory structure
+- [ ] Set up test API keys
+- [ ] Profile current performance
+
+**Core Migration**:
+- [ ] Create AKAB feature structure (16 features)
 - [ ] Extract quick_compare (Level 1)
 - [ ] Extract campaigns (Level 2)
 - [ ] Extract experiments (Level 3)  
+- [ ] Extract multi_turn execution
+- [ ] Extract scientific_integrity enforcement
+- [ ] Extract laboratory (statistics)
+- [ ] Extract blinding/hermes abstractions
 - [ ] Extract reporting features
-- [ ] Convert all prompts to YAML
+- [ ] Convert all prompts to YAML (12 identified)
+- [ ] Migrate from hardcoded models to .env registry
 - [ ] Add tool metadata
 - [ ] Integrate workflow hints
 - [ ] Delete server.py monolith
 - [ ] Delete models.json
+
+**Validation**:
+- [ ] All response data preserved
+- [ ] Cost precision maintained (4 decimals)
+- [ ] Blinding mappings intact
+- [ ] Multi-turn state management works
+- [ ] Provider initialization fails loudly
+- [ ] Scientific integrity checks enforced
+- [ ] Metrics locked at campaign creation
+- [ ] Nuclear honesty in reporting
+- [ ] Bias detection triggers active
 
 ### Phase 3: Synapse
 
