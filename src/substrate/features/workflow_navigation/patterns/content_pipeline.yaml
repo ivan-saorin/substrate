@@ -1,0 +1,107 @@
+name: Content Pipeline
+description: Generate and format content for multiple platforms
+category: content_pipeline
+tags: [generation, formatting, multi-platform]
+version: 1.0
+
+steps:
+  - id: generate
+    tool: synapse:stable_genius
+    description: Generate expert-level content on topic
+    inputs:
+      topic: required
+      domain: optional
+      word_count: optional
+    outputs:
+      - name: generated_content
+        type: text
+      - name: content_ref
+        type: reference
+    next: save_original
+
+  - id: save_original
+    tool: substrate:create_ref
+    description: Save the generated content for reference
+    inputs:
+      content: $outputs.generate.generated_content
+      ref: content/original/{timestamp}
+    outputs:
+      - name: original_ref
+        type: reference
+    next: select_platform
+
+  - id: select_platform
+    description: Choose target platform(s) for formatting
+    inputs:
+      platforms: optional
+    outputs:
+      - name: selected_platforms
+        type: list
+    next:
+      - condition: single_platform
+        goto: format_single
+      - condition: multiple_platforms
+        goto: format_multiple
+
+  - id: format_single
+    tool: tloen:execute
+    description: Format content for single platform
+    inputs:
+      prompt: $outputs.generate.generated_content
+      ref: sites/{platform}
+      save_as: output/{platform}_formatted
+    outputs:
+      - name: formatted_content
+        type: text
+      - name: formatted_ref
+        type: reference
+    next: apply_persona
+
+  - id: format_multiple
+    tool: tloen:execute
+    description: Format content for multiple platforms
+    inputs:
+      prompt: $outputs.generate.generated_content
+      refs: $outputs.select_platform.selected_platforms
+      save_as: output/multiplatform_formatted
+    outputs:
+      - name: formatted_content
+        type: text
+      - name: formatted_ref
+        type: reference
+    next: apply_persona
+
+  - id: apply_persona
+    tool: uqbar:execute
+    description: Apply persona or style to formatted content
+    inputs:
+      prompt: $outputs.format_single.formatted_content || $outputs.format_multiple.formatted_content
+      ref: personas/{selected_persona}
+      save_as: output/final_content
+    outputs:
+      - name: final_content
+        type: text
+      - name: final_ref
+        type: reference
+    next: save_final
+
+  - id: save_final
+    tool: substrate:create_ref
+    description: Save final formatted and styled content
+    inputs:
+      content: $outputs.apply_persona.final_content
+      ref: content/final/{platform}_{timestamp}
+    outputs:
+      - name: saved_ref
+        type: reference
+    next: complete
+
+  - id: complete
+    description: Content pipeline complete
+    outputs:
+      - name: original_content
+        type: reference
+      - name: formatted_versions
+        type: list
+      - name: final_versions
+        type: list

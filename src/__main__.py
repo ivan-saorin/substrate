@@ -1,12 +1,13 @@
 """Main entry point for substrate MCP server."""
 
+import asyncio
 import logging
 import sys
 
-from substrate.server import SubstrateServer
+from substrate.server import server
 
 
-def main():
+async def main():
     """Run the substrate MCP server."""
     # Configure logging
     logging.basicConfig(
@@ -18,9 +19,8 @@ def main():
     logger = logging.getLogger(__name__)
     
     try:
-        logger.info("Starting Substrate MCP Server v1.0.0")
-        server = SubstrateServer()
-        server.run()
+        logger.info("Starting Substrate MCP Server v2.0.0")
+        await server.run()
     except KeyboardInterrupt:
         logger.info("Received interrupt signal, shutting down...")
     except Exception as e:
@@ -31,4 +31,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

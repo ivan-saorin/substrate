@@ -1,0 +1,169 @@
+name: Cross-Server Integration
+description: Demonstrates full Atlas system integration across all servers
+category: advanced
+tags: [integration, comprehensive, multi-server]
+version: 1.0
+
+steps:
+  - id: start
+    tool: substrate:documentation
+    description: Review system capabilities and choose approach
+    inputs:
+      doc_type: component-map
+    outputs:
+      - name: system_map
+        type: documentation
+    next: define_goal
+
+  - id: define_goal
+    description: Define the content creation goal
+    inputs:
+      goal: required
+      target_audience: optional
+      platforms: optional
+    outputs:
+      - name: project_spec
+        type: specification
+    next: generate_base
+
+  - id: generate_base
+    tool: synapse:stable_genius
+    description: Generate comprehensive base content
+    inputs:
+      topic: $outputs.define_goal.project_spec.topic
+      domain: $outputs.define_goal.project_spec.domain
+      word_count: 3000
+    outputs:
+      - name: base_content
+        type: text
+      - name: content_ref
+        type: reference
+    next: select_persona
+
+  - id: select_persona
+    tool: uqbar:list_refs
+    description: Choose appropriate persona for audience
+    inputs:
+      prefix: personas
+    outputs:
+      - name: available_personas
+        type: list
+      - name: selected_persona
+        type: reference
+    next: apply_persona
+
+  - id: apply_persona
+    tool: uqbar:execute
+    description: Apply selected persona to content
+    inputs:
+      prompt: $outputs.generate_base.base_content
+      ref: $outputs.select_persona.selected_persona
+    outputs:
+      - name: styled_content
+        type: text
+    next: optimize_prompt
+
+  - id: optimize_prompt
+    tool: synapse:enhance_prompt
+    description: Create optimized prompt for platform formatting
+    inputs:
+      prompt: "Format this content for {platform}: {content}"
+      save_as: prompts/platform_formatter
+    outputs:
+      - name: formatter_prompt
+        type: reference
+    next: test_variations
+
+  - id: test_variations
+    tool: akab:create_campaign
+    description: Test content variations across models
+    inputs:
+      base_prompt: $outputs.apply_persona.styled_content
+      models:
+        - provider: anthropic
+          size: m
+        - provider: openai
+          size: m
+      enhancement_config:
+        multi_turn: true
+        target_tokens: 2000
+    outputs:
+      - name: campaign_id
+        type: string
+    next: run_tests
+
+  - id: run_tests
+    tool: akab:execute_campaign
+    description: Execute content generation tests
+    inputs:
+      campaign_id: $outputs.test_variations.campaign_id
+      iterations: 3
+    outputs:
+      - name: test_results
+        type: data
+    next: analyze_results
+
+  - id: analyze_results
+    tool: akab:analyze_results
+    description: Analyze which model performed best
+    inputs:
+      campaign_id: $outputs.test_variations.campaign_id
+    outputs:
+      - name: analysis
+        type: report
+      - name: best_content
+        type: text
+    next: format_platforms
+
+  - id: format_platforms
+    tool: tloen:execute
+    description: Format for multiple platforms
+    inputs:
+      prompt: $outputs.analyze_results.best_content
+      refs:
+        - sites/reddit
+        - sites/twitter
+        - sites/linkedin
+      save_as: output/multiplatform
+    outputs:
+      - name: formatted_versions
+        type: text
+    next: save_all
+
+  - id: save_all
+    tool: substrate:create_ref
+    description: Save all versions with metadata
+    inputs:
+      content: $outputs.format_platforms.formatted_versions
+      ref: projects/{project_name}/final
+      metadata:
+        workflow: cross-server-integration
+        persona: $outputs.select_persona.selected_persona
+        platforms: $inputs.platforms
+        campaign_id: $outputs.test_variations.campaign_id
+    outputs:
+      - name: project_ref
+        type: reference
+    next: generate_report
+
+  - id: generate_report
+    tool: substrate:workflow_guide
+    description: Generate execution report
+    inputs:
+      workflow_name: Cross-Server Integration
+    outputs:
+      - name: execution_report
+        type: report
+    next: complete
+
+  - id: complete
+    description: Cross-server workflow complete
+    outputs:
+      - name: project_reference
+        type: reference
+      - name: formatted_content
+        type: list
+      - name: performance_metrics
+        type: report
+      - name: execution_trace
+        type: log

@@ -1,0 +1,58 @@
+name: Simple Example
+description: A minimal example workflow showing basic structure
+category: example
+tags: [example, tutorial, minimal]
+version: 1.0
+
+steps:
+  - id: start
+    description: Entry point - gather requirements
+    inputs:
+      topic: required
+      style: optional
+    outputs:
+      - name: requirements
+        type: specification
+    next: create_content
+
+  - id: create_content
+    tool: substrate:create_ref
+    description: Create initial content reference
+    inputs:
+      ref: examples/{topic}
+      content: "Example content about {topic}"
+      metadata:
+        style: $inputs.style
+    outputs:
+      - name: content_ref
+        type: reference
+    next: enhance
+
+  - id: enhance
+    tool: synapse:enhance_prompt
+    description: Enhance the content
+    inputs:
+      prompt_ref: $outputs.create_content.content_ref
+    outputs:
+      - name: enhanced_ref
+        type: reference
+    next:
+      - condition: success
+        goto: complete
+      - condition: failed
+        goto: fallback
+
+  - id: fallback
+    description: Handle enhancement failure
+    outputs:
+      - name: error_report
+        type: report
+    next: complete
+
+  - id: complete
+    description: Workflow complete
+    outputs:
+      - name: final_content
+        type: reference
+      - name: summary
+        type: report

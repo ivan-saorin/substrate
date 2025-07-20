@@ -1,0 +1,85 @@
+name: Prompt Optimization
+description: Optimize prompts for maximum effectiveness across models
+category: prompt_optimization
+tags: [optimization, testing, enhancement]
+version: 1.0
+
+steps:
+  - id: analyze
+    tool: synapse:analyze_pattern_effectiveness
+    description: Analyze prompt effectiveness and identify improvement areas
+    inputs:
+      prompt: required
+      pattern: optional
+    outputs:
+      - name: analysis_report
+        type: report
+      - name: recommendations
+        type: list
+    next:
+      - condition: success
+        goto: enhance
+      - condition: already_optimal
+        goto: test
+
+  - id: enhance
+    tool: synapse:enhance_prompt
+    description: Apply enhancement patterns to improve prompt
+    inputs:
+      prompt_ref: $outputs.analyze.analysis_report
+      enhancement_strategy: optional
+    outputs:
+      - name: enhanced_prompt_ref
+        type: reference
+    next: test
+
+  - id: test
+    tool: akab:create_campaign
+    description: Create A/B test campaign to compare variations
+    inputs:
+      base_prompt: $outputs.enhance.enhanced_prompt_ref || $inputs.prompt
+      models: optional
+      enhancement_config:
+        multi_turn: optional
+        target_tokens: optional
+    outputs:
+      - name: campaign_id
+        type: string
+    next: run
+
+  - id: run
+    tool: akab:execute_campaign
+    description: Execute the campaign across multiple models
+    inputs:
+      campaign_id: $outputs.test.campaign_id
+      iterations: optional
+    outputs:
+      - name: execution_id
+        type: string
+      - name: raw_results
+        type: data
+    next: analyze_results
+
+  - id: analyze_results
+    tool: akab:analyze_results
+    description: Analyze test results with statistical rigor
+    inputs:
+      campaign_id: $outputs.test.campaign_id
+    outputs:
+      - name: analysis
+        type: report
+      - name: winner
+        type: variant
+    next:
+      - condition: clear_winner
+        goto: complete
+      - condition: needs_iteration
+        goto: enhance
+
+  - id: complete
+    description: Workflow complete - optimized prompt identified
+    outputs:
+      - name: optimized_prompt
+        type: reference
+      - name: performance_metrics
+        type: report

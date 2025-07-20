@@ -1,34 +1,9 @@
-"""Substrate - Foundation for all Atlas MCP servers
+"""Substrate - Foundation for Atlas cognitive manipulation system"""
+from .server_fastmcp import SubstrateServer
 
-This module provides base classes and components for building MCP servers
-in the Atlas cognitive manipulation system.
-"""
-
-from .base import SubstrateMCP, HermesExecutor, ExecutionRequest, ExecutionResult
-from .errors import SubstrateError, ValidationError, NotFoundError
-from .components import ResponseBuilder, ProgressTracker, SamplingManager, ReferenceManager
-from .server import SubstrateServer
-
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 __all__ = [
-    # Server (documentation server)
-    "SubstrateServer",
-    
-    # Base classes
-    "SubstrateMCP",
-    "HermesExecutor",
-    "ExecutionRequest", 
-    "ExecutionResult",
-    
-    # Errors
-    "SubstrateError",
-    "ValidationError",
-    "NotFoundError",
-    
-    # Components
-    "ResponseBuilder",
-    "ProgressTracker",
-    "SamplingManager",
-    "ReferenceManager",
+    'SubstrateServer',
+    '__version__'
 ]

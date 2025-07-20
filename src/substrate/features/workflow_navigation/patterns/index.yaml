@@ -1,0 +1,62 @@
+# Workflow Patterns Index
+# This file provides an overview of all available workflow patterns
+
+workflows:
+  - file: prompt_optimization.yaml
+    name: Prompt Optimization
+    category: prompt_optimization
+    description: Complete workflow for optimizing prompts across models
+    complexity: medium
+    servers_used: [synapse, akab, substrate]
+    
+  - file: content_pipeline.yaml
+    name: Content Pipeline
+    category: content_pipeline
+    description: Generate and format content for multiple platforms
+    complexity: medium
+    servers_used: [synapse, substrate, tloen, uqbar]
+    
+  - file: quick_testing.yaml
+    name: Quick Testing
+    category: testing
+    description: Rapid iterative prompt testing and enhancement
+    complexity: low
+    servers_used: [akab, synapse, substrate]
+    
+  - file: cross_server_integration.yaml
+    name: Cross-Server Integration
+    category: advanced
+    description: Comprehensive workflow using all Atlas capabilities
+    complexity: high
+    servers_used: [substrate, synapse, uqbar, tloen, akab]
+
+categories:
+  prompt_optimization:
+    description: Workflows focused on improving prompt effectiveness
+    typical_duration: 5-10 minutes
+    
+  content_pipeline:
+    description: Workflows for content creation and formatting
+    typical_duration: 10-15 minutes
+    
+  testing:
+    description: Quick testing and comparison workflows
+    typical_duration: 2-5 minutes
+    
+  advanced:
+    description: Complex multi-server integration workflows
+    typical_duration: 15-30 minutes
+
+usage_notes: |
+  Workflows are defined using a declarative YAML format that specifies:
+  - Steps with unique IDs
+  - Tool invocations for each step
+  - Input/output mappings between steps
+  - Conditional branching logic
+  - Metadata for discovery and navigation
+  
+  The workflow engine uses these definitions to:
+  - Provide step-by-step guidance
+  - Generate navigation suggestions
+  - Track execution progress
+  - Enable workflow reuse and sharing

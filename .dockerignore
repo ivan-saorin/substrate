@@ -42,5 +42,9 @@ build.bat
 .pytest_cache/
 htmlcov/
 
-# Don't include docs in image (will be mounted)
-docs/
+# Test files
+test_*.py
+
+# Temporary and cache
+*.tmp
+*.cache

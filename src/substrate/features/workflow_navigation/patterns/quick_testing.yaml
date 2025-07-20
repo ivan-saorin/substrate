@@ -1,0 +1,116 @@
+name: Quick Testing
+description: Rapid prompt comparison across multiple providers
+category: testing
+tags: [comparison, quick, iterative]
+version: 1.0
+
+steps:
+  - id: initial_compare
+    tool: akab:quick_compare
+    description: Quick comparison of prompt across providers
+    inputs:
+      prompt: required
+      providers: optional
+      constraints: optional
+    outputs:
+      - name: comparison_results
+        type: report
+      - name: best_performer
+        type: model
+    next: analyze_differences
+
+  - id: analyze_differences
+    description: Analyze performance differences between models
+    inputs:
+      results: $outputs.initial_compare.comparison_results
+    outputs:
+      - name: performance_gaps
+        type: analysis
+      - name: enhancement_opportunities
+        type: list
+    next:
+      - condition: significant_differences
+        goto: enhance
+      - condition: minimal_differences
+        goto: complete
+
+  - id: enhance
+    tool: synapse:enhance_prompt
+    description: Enhance prompt based on best performer insights
+    inputs:
+      prompt: $inputs.prompt
+      model: $outputs.initial_compare.best_performer
+      enhancement_strategy: balanced
+    outputs:
+      - name: enhanced_prompt
+        type: text
+      - name: enhancement_ref
+        type: reference
+    next: recompare
+
+  - id: recompare
+    tool: akab:quick_compare
+    description: Compare enhanced version across providers
+    inputs:
+      prompt: $outputs.enhance.enhanced_prompt
+      providers: $inputs.providers
+      constraints: $inputs.constraints
+    outputs:
+      - name: enhanced_results
+        type: report
+      - name: improvement_metrics
+        type: metrics
+    next: evaluate_improvement
+
+  - id: evaluate_improvement
+    description: Evaluate if enhancement improved performance
+    inputs:
+      original_results: $outputs.initial_compare.comparison_results
+      enhanced_results: $outputs.recompare.enhanced_results
+    outputs:
+      - name: improvement_analysis
+        type: report
+      - name: recommendation
+        type: text
+    next:
+      - condition: significant_improvement
+        goto: save_enhanced
+      - condition: no_improvement
+        goto: alternative_approach
+
+  - id: save_enhanced
+    tool: substrate:create_ref
+    description: Save the enhanced prompt
+    inputs:
+      content: $outputs.enhance.enhanced_prompt
+      ref: prompts/enhanced/{timestamp}
+      metadata:
+        original_prompt: $inputs.prompt
+        improvement_metrics: $outputs.recompare.improvement_metrics
+    outputs:
+      - name: saved_ref
+        type: reference
+    next: complete
+
+  - id: alternative_approach
+    tool: synapse:analyze_pattern_effectiveness
+    description: Analyze why enhancement didn't work
+    inputs:
+      prompt: $inputs.prompt
+      failed_enhancement: $outputs.enhance.enhanced_prompt
+    outputs:
+      - name: failure_analysis
+        type: report
+      - name: alternative_patterns
+        type: list
+    next: complete
+
+  - id: complete
+    description: Quick testing workflow complete
+    outputs:
+      - name: best_prompt
+        type: text
+      - name: performance_report
+        type: report
+      - name: recommendations
+        type: list
