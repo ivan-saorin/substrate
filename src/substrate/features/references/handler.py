@@ -16,7 +16,7 @@ class ReferenceHandler:
         logger.info("ReferenceHandler initialized")
     
     async def create_reference(self, ref: str, content: str, 
-                             metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                             metadata: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
         Create or update a reference
         

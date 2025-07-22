@@ -33,7 +33,7 @@ def register_execution_tools(mcp) -> List[dict]:
     async def execute(
         prompt: Optional[str] = None,
         ref: Optional[str] = None,
-        refs: Optional[List[str]] = None,
+        refs: List[str] = [],
         prompt_ref: Optional[str] = None,
         save_as: Optional[str] = None
     ) -> Dict[str, Any]:

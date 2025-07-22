@@ -2,3 +2,13 @@
 fastmcp>=0.1.0
 pyyaml>=6.0
 python-dotenv>=1.0.0
+
+# AI Provider Libraries (for ClearHermes)
+anthropic>=0.39.0
+openai>=1.54.4
+google-generativeai>=0.3.0
+
+# Additional dependencies
+aiofiles>=24.1.0
+numpy>=1.26.0
+scipy>=1.11.0

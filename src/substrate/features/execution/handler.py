@@ -21,7 +21,7 @@ class ExecutionHandler:
         self,
         prompt: Optional[str] = None,
         ref: Optional[str] = None,
-        refs: Optional[List[str]] = None,
+        refs: List[str] = [],
         prompt_ref: Optional[str] = None,
         save_as: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -76,7 +76,7 @@ class ExecutionHandler:
         self,
         prompt: Optional[str],
         ref: Optional[str],
-        refs: Optional[List[str]],
+        refs: List[str],
         prompt_ref: Optional[str]
     ) -> str:
         """Resolve input content based on priority"""
@@ -122,7 +122,7 @@ class ExecutionHandler:
         self,
         prompt: Optional[str],
         ref: Optional[str], 
-        refs: Optional[List[str]],
+        refs: List[str],
         prompt_ref: Optional[str]
     ) -> str:
         """Determine which input type was used"""

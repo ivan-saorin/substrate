@@ -7,7 +7,7 @@ REM Change to script directory
 cd /d "%~dp0"
 
 REM Build the image
-docker build -t substrate-mcp:latest .
+docker build -t substrate-mcp:latest -t atlas/substrate:latest .
 
 if %ERRORLEVEL% EQU 0 (
     echo.

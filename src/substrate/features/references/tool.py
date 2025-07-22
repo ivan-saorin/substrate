@@ -29,7 +29,7 @@ def register_reference_tools(mcp) -> List[dict]:
     async def create_ref(
         ref: str,
         content: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
         """Create or update a reference"""
         try:

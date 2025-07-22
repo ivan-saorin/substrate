@@ -3,7 +3,7 @@ Model Registry - Single Source of Truth from .env
 """
 import os
 import re
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -198,6 +198,15 @@ class ModelRegistry:
             api_names[model.api_name] = model.identifier
             
         return {k: v for k, v in issues.items() if v}
+    
+    def get_summary(self) -> Dict[str, Any]:
+        """Get registry summary for documentation"""
+        providers = list(set(m.provider.value for m in self.models.values()))
+        return {
+            "providers": providers,
+            "models": len(self.models),
+            "sizes": list(set(m.size.value for m in self.models.values()))
+        }
 
 
 # Singleton instance
