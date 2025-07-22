@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -19,20 +22,24 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual environments
+.env
+.venv
+env/
 venv/
 ENV/
-env/
-.venv
+env.bak/
+venv.bak/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
 
 # Testing
 .pytest_cache/
@@ -40,19 +47,37 @@ env/
 htmlcov/
 .tox/
 .nox/
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+coverage.xml
+*.cover
+.hypothesis/
 
 # Logs
 *.log
+logs/
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Project specific
-*.bak
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Docker
+.dockerignore
+
+# Temporary files
 *.tmp
+*.bak
+*.swp
+temp/
+tmp/
