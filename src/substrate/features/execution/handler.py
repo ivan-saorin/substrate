@@ -1,6 +1,7 @@
 """
 Execution feature - Business logic handler
 """
+import os
 import logging
 from typing import Dict, Any, Optional, List
 
@@ -14,8 +15,12 @@ class ExecutionHandler:
         logger.info("ExecutionHandler initialized")
         # Import inside to avoid circular imports
         from ...shared.instances import reference_manager, prompt_loader
+        from ...shared.api.clear_hermes import ClearHermes
+        from ...shared.models import get_model_registry
         self.reference_manager = reference_manager
         self.prompt_loader = prompt_loader
+        self.hermes = ClearHermes()
+        self.model_registry = get_model_registry()
     
     async def execute_transformation(
         self,
@@ -51,9 +56,8 @@ class ExecutionHandler:
             # Determine transformation template
             template = await self._resolve_template(prompt_ref)
             
-            # For now, simulate transformation
-            # In real implementation, this would apply the template
-            result_content = f"[Transformed using template]\n{input_content}"
+            # Apply transformation using LLM
+            result_content = await self._apply_transformation(input_content, ref, refs, template)
             
             # Save if requested
             if save_as:
@@ -136,3 +140,57 @@ class ExecutionHandler:
             return "direct_prompt"
         else:
             return "none"
+    
+    async def _apply_transformation(
+        self,
+        input_content: str,
+        ref: Optional[str],
+        refs: List[str],
+        template: Optional[str]
+    ) -> str:
+        """Apply transformation using LLM"""
+        try:
+            # Get instance type to determine transformation type
+            instance_type = os.getenv('INSTANCE_TYPE', 'substrate').lower()
+            
+            # Build execution prompt - simple unified approach
+            if ref:
+                # Load the template/persona as a "program"
+                program = await self.reference_manager.read_ref(ref)
+                
+                # Replace placeholders in the program
+                program = program.replace('{{content}}', input_content)
+                program = program.replace('{{topic}}', input_content)  # For compatibility
+                
+                # Execute as a program
+                execution_prompt = f"execute the following program:\n{program}"
+            elif template:
+                # Use provided template
+                execution_prompt = f"execute the following program:\n{template.replace('{content}', input_content)}"
+            else:
+                # Direct execution
+                execution_prompt = input_content
+            
+            # Get model (default to anthropic_m)
+            model = self.model_registry.get('anthropic_m')
+            if not model:
+                logger.error("No model available for transformation")
+                return input_content
+            
+            logger.info(f"Using model: {model.api_name} ({model.identifier})")
+            
+            # Call LLM
+            result = await self.hermes.complete(
+                model=model,
+                prompt=execution_prompt,
+                max_tokens=2000,
+                temperature=0.7
+            )
+            
+            return result['content']
+            
+        except Exception as e:
+            logger.error(f"Error applying transformation: {e}", exc_info=True)
+            # Fallback to original content
+            return input_content
+
