@@ -1,0 +1,129 @@
+version: 2.0
+name: akab
+description: Scientific experimentation framework for A/B testing prompts and measuring LLM performance
+
+summary: |
+  I am AKAB, the experimentation engine. I provide rigorous A/B testing capabilities for comparing prompts, models, and strategies to discover what works best.
+
+usage: |
+  I am AKAB, your scientific experimentation framework for LLM testing. I help you move from guessing to knowing by providing three levels of experimental rigor.
+
+  **Understanding the AKAB Philosophy**:
+
+  Creative breakthroughs and effective prompts might feel like magic, but they follow patterns. What seems like random success actually has underlying principles. I help you discover these principles through rigorous testing.
+
+  **The Three Levels of Scientific Rigor**:
+
+  **Level 1: Quick Discovery** (`akab_quick_compare`)
+  
+  Rapid prototyping for immediate insights. No blinds, real-time results, perfect for quick iteration.
+  
+  Use Level 1 when:
+  - Exploring new approaches
+  - Need rapid feedback loops
+  - Testing initial hypotheses
+  - Building intuition
+
+  **Level 2: Controlled Testing** (`akab_create_campaign`)
+  
+  Double-blind testing with hidden variants to prevent bias. Like a proper scientific study.
+  
+  Use Level 2 when:
+  - Comparing approaches systematically
+  - Need unbiased results
+  - Testing for production use
+  - Building evidence for strategies
+
+  **Level 3: Deep Science** (`akab_create_experiment`)
+  
+  Complete experimental control with statistical significance requirements and scrambled identities.
+  
+  Use Level 3 when:
+  - Pursuing fundamental insights
+  - Need irrefutable proof
+  - Publishing research
+  - Testing critical hypotheses
+
+  **Core Capabilities**:
+
+  1. **Multi-Provider Testing**: Compare responses across different LLM providers
+  2. **Blind Testing**: Prevent bias through variant hiding
+  3. **Statistical Analysis**: Measure effect sizes, p-values, and confidence intervals
+  4. **Cost Tracking**: Monitor token usage and costs across experiments
+  5. **Multi-Turn Conversations**: Test extended interactions
+
+  **Metrics Tracked**:
+  - Quality scores (model-judged)
+  - Response diversity
+  - Token usage and cost
+  - Generation speed
+  - Custom success criteria
+
+  **Setting Up Experiments**:
+
+  **Quick Comparison**:
+  ```python
+  result = akab_quick_compare(
+      prompt="Explain quantum computing",
+      providers=["anthropic", "openai"],
+      constraints={"max_tokens": 500}
+  )
+  ```
+
+  **Campaign Testing**:
+  ```python
+  campaign = akab_create_campaign(
+      name="Prompt Optimization Study",
+      description="Testing different prompt strategies",
+      variants=[
+          {"id": "baseline", "prompt": "Write a summary"},
+          {"id": "detailed", "prompt": "Write a comprehensive summary with examples"}
+      ],
+      success_criteria={"metric": "quality_score", "threshold": 0.8}
+  )
+  ```
+
+  **Statistical Insights**:
+  - Sample sizes: 1-5 (quick), 10-30 (campaign), 30+ (experiment)
+  - Effect sizes: d=0.2 (small), d=0.5 (medium), d=0.8+ (large)
+  - P-values: <0.05 (significant), <0.01 (highly significant)
+
+  **Best Practices**:
+  - Test substantially different approaches, not just minor variations
+  - Consider context - what works for one use case may not for another
+  - Don't stop at first success - breakthrough insights often require exploration
+  - Balance metrics with qualitative assessment
+
+examples:
+  - description: Quick comparison of providers
+    tool: akab_quick_compare
+    args:
+      prompt: Explain machine learning to a beginner
+      providers: ["anthropic", "openai"]
+    expected_result: |
+      Provider A: 92% clarity score, 450 tokens
+      Provider B: 88% clarity score, 380 tokens
+
+  - description: Test prompt variations
+    tool: akab_create_campaign
+    args:
+      name: Prompt Strategy Study
+      variants:
+        - id: simple
+          prompt: "Summarize this article"
+        - id: structured
+          prompt: "Summarize this article with: 1) Main points 2) Key takeaways 3) Applications"
+    expected_result: |
+      Structured variant: +34% comprehensiveness
+      Simple variant: -22% token usage
+
+  - description: Scientific hypothesis testing
+    tool: akab_create_experiment
+    args:
+      name: Context Window Effects Study
+      hypothesis: Longer context improves response coherence
+      variants: ["short_context", "medium_context", "long_context"]
+      iterations_per_variant: 50
+    expected_result: |
+      Results hidden until statistical significance reached.
+      Progress: 45/150 iterations

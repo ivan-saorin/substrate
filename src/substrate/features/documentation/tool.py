@@ -21,32 +21,37 @@ def register_documentation_tools(mcp) -> List[dict]:
     # Import shared instances inside function to avoid circular imports
     from ...shared.instances import response_builder, INSTANCE_TYPE
     
-    # Create handler instance
-    handler = DocumentationHandler()
+    # Create handler instance with instance type
+    handler = DocumentationHandler(instance_type=INSTANCE_TYPE)
     
     # Register documentation tool with instance-specific name
     @mcp.tool(name=f"{INSTANCE_TYPE}_documentation")
     async def documentation(doc_type: str = "overview") -> Dict[str, Any]:
         """Access system architecture and methodology documentation"""
         try:
+            # If doc_type is "overview", use the instance type
+            if doc_type == "overview":
+                doc_type = INSTANCE_TYPE
+                
             result = await handler.get_documentation(doc_type)
             
             # Build suggestions based on doc type
             suggestions = []
-            if doc_type == "overview":
-                suggestions.append(
+            if doc_type == INSTANCE_TYPE:
+                # Suggest reading other important docs
+                suggestions.extend([
                     response_builder.suggest_next(
                         f"{INSTANCE_TYPE}_documentation",
                         "Read ASR v2.0 - Complete architecture", 
                         doc_type="asr-v2"
+                    ),
+                    response_builder.suggest_next(
+                        f"{INSTANCE_TYPE}_list_docs",
+                        "See all available documentation"
                     )
-                )
+                ])
             
-            return response_builder.success(
-                data=result,
-                message=f"Loaded {doc_type} documentation",
-                suggestions=suggestions
-            )
+            return result  # Handler already uses response_builder
             
         except Exception as e:
             logger.error(f"Error in {INSTANCE_TYPE}_documentation: {e}", exc_info=True)
@@ -61,11 +66,7 @@ def register_documentation_tools(mcp) -> List[dict]:
         """List all available documentation"""
         try:
             result = await handler.list_documentation()
-            
-            return response_builder.success(
-                data=result,
-                message=f"Found {result['count']} documentation files"
-            )
+            return result  # Handler already uses response_builder
             
         except Exception as e:
             logger.error(f"Error in {INSTANCE_TYPE}_list_docs: {e}", exc_info=True)
