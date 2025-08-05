@@ -22,9 +22,6 @@ ENV PATH=/root/.local/bin:$PATH
 COPY src/ ./src/
 COPY main.py .
 
-# Copy documentation
-COPY docs/ ./docs/
-
 # Create data directory
 RUN mkdir -p /app/data/refs
 
