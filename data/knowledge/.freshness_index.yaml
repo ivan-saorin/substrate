@@ -1,0 +1,37 @@
+entries:
+  facts/technical/mdtr_testbench_architecture.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.764320'
+    needs_verification: true
+    status: fresh
+  facts/technical/mdtr_testbench_cli_reference.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.769202'
+    needs_verification: true
+    status: fresh
+  insights/experimental/mdtr_testbench_troubleshooting_guide.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.841908'
+    needs_verification: true
+    status: stale
+  insights/lessons_learned/mdtr_testbench_golden_rules_and_best_practices.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.861918'
+    needs_verification: true
+    status: fresh
+  insights/project_specific/mdtr_creative_writing_research_strategy.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.870898'
+    needs_verification: true
+    status: stale
+  patterns/architectural/mdtr_testbench_plugin_development_guide.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.789713'
+    needs_verification: true
+    status: fresh
+  patterns/operational/mdtr_testbench_development_patterns.md:
+    age_days: 35
+    last_checked: '2025-10-02T11:44:01.813461'
+    needs_verification: true
+    status: fresh
+last_check: '2025-10-02T11:44:01.870955'
